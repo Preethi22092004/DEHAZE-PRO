@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Methods - Image Dehazing System</title>
+    <!-- Bootstrap CSS with Replit dark theme -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+    <style>
+        .method-card {
+            height: 100%;
+        }
+        .image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            overflow: hidden;
+            background-color: #212529;
+        }
+        .image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .method-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .method-description {
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-cloud-sun-rain me-2"></i>
+                Image Dehazing System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/video">Video</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/compare">Compare</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="py-5 bg-dark">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="text-center my-5">
+                        <h1 class="display-5 fw-bold text-white mb-2">Compare Dehazing Methods</h1>
+                        <p class="lead text-muted mb-4">Upload an image to see results from different dehazing algorithms side by side</p>
+                        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                            <button id="upload-btn" class="btn btn-primary btn-lg px-4">
+                                <i class="fas fa-upload me-2"></i>Upload Image
+                            </button>
+                            <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Processing Section -->
+    <section class="py-5 d-none" id="processing-section">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-8">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold">Processing Your Image</h2>
+                        <div class="progress mt-4">
+                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <p class="text-muted mt-3" id="status-message">Applying multiple dehazing methods...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="py-5 d-none" id="results-section">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold">Dehazing Methods Comparison</h2>
+                        <p class="text-muted">See how different dehazing algorithms perform on your image</p>
+                    </div>
+                    
+                    <div class="row mb-5">
+                        <div class="col-12">
+                            <div class="card border-0 shadow mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Original Image</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="image-container">
+                                        <img id="original-image" class="img-fluid" alt="Original image">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row" id="methods-container">
+                        <!-- Method results will be added here dynamically -->
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button id="try-another-btn" class="btn btn-primary">
+                            <i class="fas fa-redo me-2"></i>Compare Another Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Methods Info Section -->
+    <section class="py-5 bg-dark">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-8">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold text-white">Dehazing Algorithms</h2>
+                        <p class="text-muted">Learn about the different methods we use to remove haze and visual obstructions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row gx-5">
+                <div class="col-md-4 mb-5">
+                    <div class="card h-100 border-0">
+                        <div class="card-body p-4">
+                            <div class="feature text-center mb-3">
+                                <i class="fas fa-brain fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title text-center mb-3">Enhanced Dehazing</h5>
+                            <p class="card-text text-muted">Uses a deep learning model based on ResNet architecture that has been pretrained on ImageNet and fine-tuned specifically for the dehazing task. This approach offers high-quality results with better detail preservation.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-5">
+                    <div class="card h-100 border-0">
+                        <div class="card-body p-4">
+                            <div class="feature text-center mb-3">
+                                <i class="fas fa-cloud-sun fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title text-center mb-3">AOD-Net</h5>
+                            <p class="card-text text-muted">All-in-One Dehazing Network is a lightweight CNN that directly estimates the clean image through an end-to-end learning system. It's specifically designed for haze removal with a focus on computational efficiency.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-5">
+                    <div class="card h-100 border-0">
+                        <div class="card-body p-4">
+                            <div class="feature text-center mb-3">
+                                <i class="fas fa-adjust fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title text-center mb-3">CLAHE</h5>
+                            <p class="card-text text-muted">Contrast Limited Adaptive Histogram Equalization is a traditional image processing technique that enhances contrast by applying histogram equalization to small regions. It's very fast and can improve visibility in hazy or foggy scenes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Error Alert -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+        <div id="error-toast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="error-message">
+                Something went wrong. Please try again.
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-4 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">© 2025 Image Dehazing System</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileInput = document.getElementById('file-input');
+        const processingSection = document.getElementById('processing-section');
+        const resultsSection = document.getElementById('results-section');
+        const progressBar = document.getElementById('progress-bar');
+        const statusMessage = document.getElementById('status-message');
+        const originalImage = document.getElementById('original-image');
+        const methodsContainer = document.getElementById('methods-container');
+        const tryAnotherBtn = document.getElementById('try-another-btn');
+        const errorToast = document.getElementById('error-toast');
+        const errorMessage = document.getElementById('error-message');
+        
+        // Initialize Bootstrap toast
+        const toast = new bootstrap.Toast(errorToast);
+        
+        // Methods info
+        const methodsInfo = {
+            'hybrid': {
+                title: 'Hybrid Ensemble',
+                description: 'Advanced multi-model ensemble with intelligent quality scoring for best results',
+                icon: 'fas fa-star'
+            },
+            'enhanced': {
+                title: 'Enhanced Dehazing',
+                description: 'Deep learning approach with ResNet backbone for high-quality results',
+                icon: 'fas fa-brain'
+            },
+            'aod': {
+                title: 'AOD-Net',
+                description: 'All-in-One Dehazing Network, optimized for haze removal',
+                icon: 'fas fa-cloud-sun'
+            },
+            'clahe': {
+                title: 'CLAHE',
+                description: 'Traditional contrast enhancement approach, very fast',
+                icon: 'fas fa-adjust'
+            }
+        };
+        
+        // Event listeners
+        uploadBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+        
+        tryAnotherBtn.addEventListener('click', function() {
+            resetUI();
+            uploadBtn.click();
+        });
+        
+        // Handle file uploads via drag and drop
+        document.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        
+        document.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFileUpload(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // Functions
+        function handleFileUpload(file) {
+            // Check if file is an image
+            if (!file.type.match('image/(jpeg|png|jpg|webp)')) {
+                showError('Please upload a JPEG, PNG or WebP image.');
+                return;
+            }
+            
+            // Check file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File is too large. Maximum size is 10MB.');
+                return;
+            }
+            
+            // Show processing UI
+            processingSection.classList.remove('d-none');
+            resultsSection.classList.add('d-none');
+            
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                if (progress >= 90) {
+                    clearInterval(progressInterval);
+                }
+                progressBar.style.width = `${progress}%`;
+            }, 200);
+            
+            // Create FormData
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('multiple', 'true');
+            
+            // Display original image preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                originalImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            // Update status
+            statusMessage.textContent = 'Processing image with multiple dehazing methods...';
+            
+            // Send request to server
+            fetch('/upload-image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Server error occurred');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Clear progress interval
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                
+                // Show results
+                setTimeout(() => {
+                    processingSection.classList.add('d-none');
+                    resultsSection.classList.remove('d-none');
+                    
+                    // Clear previous methods
+                    methodsContainer.innerHTML = '';
+                    
+                    // Add method cards
+                    for (const [method, path] of Object.entries(data.results)) {
+                        if (methodsInfo[method]) {
+                            addMethodCard(method, path);
+                        }
+                    }
+                }, 500);
+            })
+            .catch(error => {
+                clearInterval(progressInterval);
+                processingSection.classList.add('d-none');
+                showError(error.message);
+            });
+        }
+        
+        function addMethodCard(method, imagePath) {
+            const info = methodsInfo[method];
+            
+            const colDiv = document.createElement('div');
+            colDiv.className = 'col-md-4 mb-4';
+            
+            colDiv.innerHTML = `
+                <div class="card method-card shadow-sm">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="${info.icon} text-primary me-2"></i>
+                        <h5 class="method-title mb-0">${info.title}</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="image-container">
+                            <img src="/${imagePath}" class="img-fluid" alt="${info.title} result">
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <p class="method-description text-muted mb-2">${info.description}</p>
+                        <a href="/${imagePath}" class="btn btn-sm btn-outline-primary" download>
+                            <i class="fas fa-download me-1"></i> Download
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            methodsContainer.appendChild(colDiv);
+        }
+        
+        function resetUI() {
+            // Reset file input
+            fileInput.value = '';
+            
+            // Reset progress
+            progressBar.style.width = '0%';
+            statusMessage.textContent = 'Processing image with multiple dehazing methods...';
+            
+            // Hide sections
+            processingSection.classList.add('d-none');
+            resultsSection.classList.add('d-none');
+            
+            // Clear methods container
+            methodsContainer.innerHTML = '';
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            toast.show();
+        }
+    });
+    </script>
+</body>
+</html>

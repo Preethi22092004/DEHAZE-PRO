@@ -1,0 +1,35 @@
+# Mobile App Requirements for React Native
+
+# Core React Native dependencies
+react-native
+expo
+expo-image-picker
+expo-file-system
+expo-media-library
+
+# UI Components
+react-native-paper
+react-native-elements
+react-native-vector-icons
+
+# Navigation
+@react-navigation/native
+@react-navigation/stack
+
+# API & Networking
+axios
+react-native-base64
+
+# Image/Video Processing
+react-native-image-crop-picker
+react-native-video
+react-native-onnx
+
+# State Management
+redux
+react-redux
+redux-thunk
+
+# Utils
+lodash
+moment

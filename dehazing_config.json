@@ -1,0 +1,37 @@
+{
+  "clahe_clip_limit": 3.0,
+  "clahe_tile_size": 8,
+  "brightness_boost_threshold": 0.3,
+  "brightness_boost_factor": 1.2,
+  "gamma_correction": 0.9,
+  "blend_ratio_dark": 0.7,
+  "blend_ratio_medium": 0.6,
+  "blend_ratio_bright": 0.5,
+  "color_balance_tolerance": 0.1,
+  "sharpening_strength": 1.2,
+  "performance_history": [
+    {
+      "timestamp": 1750149028.606002,
+      "input_file": "test_images\\playground_hazy.jpg",
+      "brightness": 0.48801782727241516,
+      "contrast": 0.27469509840011597,
+      "parameters_used": {
+        "clahe_clip_limit": 3.0,
+        "gamma_correction": 0.9,
+        "brightness_boost_factor": 1.2
+      }
+    },
+    {
+      "timestamp": 1750149127.457092,
+      "input_file": "test_images\\playground_hazy.jpg",
+      "brightness": 0.48801782727241516,
+      "contrast": 0.27469509840011597,
+      "parameters_used": {
+        "clahe_clip_limit": 3.0,
+        "gamma_correction": 0.9,
+        "brightness_boost_factor": 1.2
+      }
+    }
+  ],
+  "user_feedback": []
+}

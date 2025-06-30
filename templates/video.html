@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Dehazing - Image Dehazing System</title>
+    <!-- Bootstrap CSS with Replit dark theme -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+    <style>
+        .progress {
+            height: 1rem;
+        }
+        #video-preview, #result-video {
+            width: 100%;
+            max-height: 400px;
+            background-color: #212529;
+            border-radius: 0.25rem;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-cloud-sun-rain me-2"></i>
+                Image Dehazing System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/video">Video</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/compare">Compare</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="py-5 bg-dark">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="text-center my-5">
+                        <h1 class="display-5 fw-bold text-white mb-2">Video Dehazing</h1>
+                        <p class="lead text-muted mb-4">Remove haze, fog, and obstructions from your videos with our deep learning algorithms.</p>
+                        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                            <button id="upload-btn" class="btn btn-primary btn-lg px-4 me-sm-3">
+                                <i class="fas fa-upload me-2"></i>Upload Video
+                            </button>
+                            <input type="file" id="file-input" accept=".mp4,.mov,.avi,.mkv" style="display: none;">
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-outline-light btn-lg px-4 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cog me-2"></i>Options
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><h6 class="dropdown-header"><i class="fas fa-star me-2"></i>Hybrid Ensemble (Best Quality)</h6></li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-hybrid" value="hybrid">
+                                                <label class="form-check-label" for="model-hybrid">
+                                                    <strong>Hybrid Ensemble</strong> <span class="badge bg-warning">Best Results</span><br>
+                                                    <small class="text-muted">Combines multiple AI models (Image only - videos use natural)</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header"><i class="fas fa-leaf me-2"></i>Natural Dehazing (Recommended)</h6></li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-natural" value="natural">
+                                                <label class="form-check-label" for="model-natural">
+                                                    <strong>Natural Dehazing</strong><br>
+                                                    <small class="text-muted">Preserves natural colors</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-adaptive-natural" value="adaptive_natural">
+                                                <label class="form-check-label" for="model-adaptive-natural">
+                                                    <strong>Adaptive Natural</strong><br>
+                                                    <small class="text-muted">Auto-adjusts strength</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-conservative" value="conservative">
+                                                <label class="form-check-label" for="model-conservative">
+                                                    <strong>Conservative Dehazing</strong><br>
+                                                    <small class="text-muted">Very gentle, subtle improvements</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-minimal" value="minimal" checked>
+                                                <label class="form-check-label" for="model-minimal">
+                                                    <strong>Minimal Enhancement</strong> <span class="badge bg-success">Recommended</span><br>
+                                                    <small class="text-muted">95% original, 5% enhanced</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-passthrough" value="passthrough">
+                                                <label class="form-check-label" for="model-passthrough">
+                                                    <strong>Passthrough</strong> <span class="badge bg-info">Testing</span><br>
+                                                    <small class="text-muted">No processing - original image copy</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header"><i class="fas fa-brain me-2"></i>AI Models</h6></li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-enhanced" value="enhanced">
+                                                <label class="form-check-label" for="model-enhanced">
+                                                    <strong>Enhanced Dehazing</strong><br>
+                                                    <small class="text-muted">ResNet-based model</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-aod" value="aod">
+                                                <label class="form-check-label" for="model-aod">
+                                                    <strong>AOD-Net</strong><br>
+                                                    <small class="text-muted">Faster processing</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Upload Section -->
+    <section class="py-5 d-none" id="upload-section">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card border-0 shadow mb-5">
+                        <div class="card-body p-5">
+                            <h2 class="card-title text-center mb-4">Preview Your Video</h2>
+                            <div class="row">
+                                <div class="col-md-10 mx-auto">
+                                    <div class="ratio ratio-16x9 mb-4">
+                                        <video id="video-preview" controls></video>
+                                    </div>
+                                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                                        <button type="button" class="btn btn-success" id="process-btn">
+                                            <i class="fas fa-magic me-2"></i>Process Video
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" id="change-video-btn">
+                                            <i class="fas fa-exchange-alt me-2"></i>Change Video
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Processing Section -->
+    <section class="py-5 d-none" id="processing-section">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow">
+                        <div class="card-body text-center p-5">
+                            <h2 class="fw-bold mb-4">Processing Your Video</h2>
+                            <div class="d-flex justify-content-center mb-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <p class="text-muted mb-3" id="status-message">Analyzing and processing video frames...</p>
+                            <div class="progress mt-4">
+                                <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <p class="text-muted small mt-2">
+                                Video processing may take several minutes depending on length and resolution.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="py-5 d-none" id="results-section">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold">Before & After</h2>
+                        <p class="text-muted">See the difference our dehazing technology makes!</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Original Video</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="ratio ratio-16x9">
+                                        <video id="original-video" controls></video>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Dehazed Video</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="ratio ratio-16x9">
+                                        <video id="result-video" controls></video>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a id="download-btn" class="btn btn-success me-2" download>
+                            <i class="fas fa-download me-2"></i>Download
+                        </a>
+                        <button id="try-another-btn" class="btn btn-secondary">
+                            <i class="fas fa-redo me-2"></i>Process Another Video
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Error Alert -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+        <div id="error-toast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="error-message">
+                Something went wrong. Please try again.
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="py-5 bg-dark">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-8">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold text-white">Video Dehazing Features</h2>
+                        <p class="text-muted">Process various types of video obstructions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row gx-5">
+                <div class="col-lg-4 mb-5">
+                    <div class="card h-100 border-0">
+                        <div class="card-body p-4">
+                            <div class="feature text-center mb-3">
+                                <i class="fas fa-smog fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title text-center mb-3">Fog & Haze Removal</h5>
+                            <p class="card-text text-muted">Enhances visibility in outdoor videos affected by atmospheric conditions like fog, haze, and mist.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-5">
+                    <div class="card h-100 border-0">
+                        <div class="card-body p-4">
+                            <div class="feature text-center mb-3">
+                                <i class="fas fa-water fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title text-center mb-3">Water Obstruction Clearing</h5>
+                            <p class="card-text text-muted">Improves underwater footage or videos taken through glass with water droplets and splash obstructions.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-5">
+                    <div class="card h-100 border-0">
+                        <div class="card-body p-4">
+                            <div class="feature text-center mb-3">
+                                <i class="fas fa-film fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title text-center mb-3">Real-time Processing</h5>
+                            <p class="card-text text-muted">Processes videos frame by frame, maintaining temporal consistency while removing visual obstructions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">© 2025 Image Dehazing System</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileInput = document.getElementById('file-input');
+        const videoPreview = document.getElementById('video-preview');
+        const uploadSection = document.getElementById('upload-section');
+        const processingSection = document.getElementById('processing-section');
+        const resultsSection = document.getElementById('results-section');
+        const processBtn = document.getElementById('process-btn');
+        const changeVideoBtn = document.getElementById('change-video-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const statusMessage = document.getElementById('status-message');
+        const originalVideo = document.getElementById('original-video');
+        const resultVideo = document.getElementById('result-video');
+        const downloadBtn = document.getElementById('download-btn');
+        const tryAnotherBtn = document.getElementById('try-another-btn');
+        const errorToast = document.getElementById('error-toast');
+        const errorMessage = document.getElementById('error-message');
+        
+        // Initialize Bootstrap toast
+        const toast = new bootstrap.Toast(errorToast);
+        
+        // Store file and task ID
+        let selectedFile = null;
+        let taskId = null;
+        let pollInterval = null;
+        
+        // Event listeners
+        uploadBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                selectedFile = e.target.files[0];
+                handleFileSelect(selectedFile);
+            }
+        });
+        
+        processBtn.addEventListener('click', function() {
+            uploadVideo();
+        });
+        
+        changeVideoBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        tryAnotherBtn.addEventListener('click', function() {
+            resetUI();
+            uploadBtn.click();
+        });
+        
+        // Functions
+        function handleFileSelect(file) {
+            // Check if file is a video
+            if (!file.type.match('video/*')) {
+                showError('Please upload a valid video file (MP4, MOV, AVI, or MKV).');
+                return;
+            }
+            
+            // Check file size (max 100MB)
+            if (file.size > 100 * 1024 * 1024) {
+                showError('File is too large. Maximum size is 100MB.');
+                return;
+            }
+            
+            // Show preview
+            uploadSection.classList.remove('d-none');
+            processingSection.classList.add('d-none');
+            resultsSection.classList.add('d-none');
+            
+            // Set video preview
+            videoPreview.src = URL.createObjectURL(file);
+            videoPreview.load();
+        }
+        
+        function uploadVideo() {
+            if (!selectedFile) {
+                showError('Please select a video file first.');
+                return;
+            }
+            
+            // Show processing UI
+            uploadSection.classList.add('d-none');
+            processingSection.classList.remove('d-none');
+            resultsSection.classList.add('d-none');
+            
+            // Reset progress
+            progressBar.style.width = '0%';
+            statusMessage.textContent = 'Uploading video...';
+            
+            // Get selected model
+            const modelType = document.querySelector('input[name="model"]:checked').value;
+            
+            // Create FormData
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('model', modelType);
+            
+            // Send request to server
+            fetch('/upload-video', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Server error occurred');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Store task ID
+                taskId = data.task_id;
+                
+                // Set original video
+                originalVideo.src = URL.createObjectURL(selectedFile);
+                originalVideo.load();
+                
+                // Start polling for status
+                statusMessage.textContent = 'Processing video with dehazing model...';
+                startPolling();
+            })
+            .catch(error => {
+                processingSection.classList.add('d-none');
+                showError(error.message);
+            });
+        }
+        
+        function startPolling() {
+            // Check status every 3 seconds
+            pollInterval = setInterval(checkStatus, 3000);
+        }
+        
+        function checkStatus() {
+            fetch(`/video-status/${taskId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update progress bar
+                    progressBar.style.width = `${data.progress}%`;
+                    
+                    // Check status
+                    if (data.status === 'completed') {
+                        clearInterval(pollInterval);
+                        showResults(data.output);
+                    } else if (data.status === 'failed') {
+                        clearInterval(pollInterval);
+                        processingSection.classList.add('d-none');
+                        showError(data.error || 'Video processing failed.');
+                    } else {
+                        // Still processing
+                        statusMessage.textContent = `Processing video (${Math.round(data.progress)}% complete)...`;
+                    }
+                })
+                .catch(error => {
+                    clearInterval(pollInterval);
+                    processingSection.classList.add('d-none');
+                    showError('Error checking processing status.');
+                });
+        }
+        
+        function showResults(outputPath) {
+            // Hide processing section
+            processingSection.classList.add('d-none');
+            
+            // Show results section
+            resultsSection.classList.remove('d-none');
+            
+            // Set result video
+            resultVideo.src = `/${outputPath}`;
+            resultVideo.load();
+            
+            // Set download link
+            downloadBtn.href = `/${outputPath}`;
+            downloadBtn.download = outputPath.split('/').pop();
+        }
+        
+        function resetUI() {
+            // Clear file input
+            fileInput.value = '';
+            selectedFile = null;
+            
+            // Clear video previews
+            videoPreview.src = '';
+            originalVideo.src = '';
+            resultVideo.src = '';
+            
+            // Reset progress
+            progressBar.style.width = '0%';
+            statusMessage.textContent = 'Uploading video...';
+            
+            // Hide sections
+            uploadSection.classList.add('d-none');
+            processingSection.classList.add('d-none');
+            resultsSection.classList.add('d-none');
+            
+            // Clear task ID and polling
+            taskId = null;
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            toast.show();
+        }
+    });
+    </script>
+</body>
+</html>

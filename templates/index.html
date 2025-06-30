@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Dehazing System</title>
+    <!-- PWA Support -->
+    <meta name="theme-color" content="#212529">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <!-- Bootstrap CSS with Replit dark theme -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-cloud-sun-rain me-2"></i>
+                Image Dehazing System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/video">Video</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/compare">Compare</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="py-5 bg-dark">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="text-center my-5">
+                        <h1 class="display-5 fw-bold text-white mb-2">Crystal Clear Dehazing</h1>
+                        <p class="lead text-muted mb-4">Upload your hazy, foggy, or obstructed images and get crystal clear results with maximum dehazing strength - no artifacts, just perfect clarity.</p>
+                        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                            <button id="upload-btn" class="btn btn-primary btn-lg px-4 me-sm-3">
+                                <i class="fas fa-upload me-2"></i>Upload Image
+                            </button>
+                            <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp" style="display: none;">
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-outline-light btn-lg px-4 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cog me-2"></i>Options
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><h6 class="dropdown-header"><i class="fas fa-leaf me-2"></i>Natural Balanced (Recommended)</h6></li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-natural-balanced" value="natural_balanced" checked>
+                                                <label class="form-check-label" for="model-natural-balanced">
+                                                    <strong>Natural Balanced Dehazing</strong> <span class="badge bg-success">Clear & Natural</span><br>
+                                                    <small class="text-muted">Perfect balance of clarity and natural colors - no artifacts</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header"><i class="fas fa-fire me-2"></i>Maximum Strength Options</h6></li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-powerful" value="powerful">
+                                                <label class="form-check-label" for="model-powerful">
+                                                    <strong>Powerful Maximum Dehazing</strong> <span class="badge bg-warning">Very Strong</span><br>
+                                                    <small class="text-muted">Extreme dehazing for very heavy fog (may be too aggressive)</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header"><i class="fas fa-cogs me-2"></i>Advanced Options</h6></li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-hybrid" value="hybrid">
+                                                <label class="form-check-label" for="model-hybrid">
+                                                    <strong>Hybrid Ensemble</strong> <span class="badge bg-warning">Complex</span><br>
+                                                    <small class="text-muted">Combines multiple AI models with intelligent quality scoring</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header"><i class="fas fa-leaf me-2"></i>Natural Dehazing (Recommended)</h6></li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-deep" value="deep">
+                                                <label class="form-check-label" for="model-deep">
+                                                    <strong>DeepDehazeNet (AI)</strong> <span class="badge bg-success">Recommended</span><br>
+                                                    <small class="text-muted">Maximum haze removal using deep learning</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-aod" value="aod">
+                                                <label class="form-check-label" for="model-aod">
+                                                    <strong>AOD-Net (AI)</strong><br>
+                                                    <small class="text-muted">Fast, strong dehazing (AI)</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header"><i class="fas fa-brain me-2"></i>AI Models</h6></li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-deep" value="deep">
+                                                <label class="form-check-label" for="model-deep">
+                                                    <strong>DeepDehazeNet</strong><br>
+                                                    <small class="text-muted">Advanced multi-scale processing</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-enhanced" value="enhanced">
+                                                <label class="form-check-label" for="model-enhanced">
+                                                    <strong>Enhanced Dehazing</strong><br>
+                                                    <small class="text-muted">ResNet-based model</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-aod" value="aod">
+                                                <label class="form-check-label" for="model-aod">
+                                                    <strong>AOD-Net</strong><br>
+                                                    <small class="text-muted">All-in-One Network (Faster)</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header"><i class="fas fa-tools me-2"></i>Traditional Methods</h6></li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="model" id="model-clahe" value="clahe">
+                                                <label class="form-check-label" for="model-clahe">
+                                                    <strong>CLAHE</strong><br>
+                                                    <small class="text-muted">Histogram equalization (Very Fast)</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <div class="dropdown-item">
+                                            <a href="/compare" class="btn btn-sm btn-primary w-100">
+                                                <i class="fas fa-balance-scale me-2"></i>Compare All Methods
+                                            </a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <a href="/video" class="btn btn-success btn-lg px-4">
+                                <i class="fas fa-video me-2"></i>Video Dehazing
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Processing Section -->
+    <section class="py-5 d-none" id="processing-section">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-8">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold">Processing Your Image</h2>
+                        <div class="progress mt-4">
+                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <p class="text-muted mt-3" id="status-message">Uploading image...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="py-5 d-none" id="results-section">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-10">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold">Before & After</h2>
+                        <p class="text-muted">See the difference our dehazing technology makes!</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Original Image</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="image-container">
+                                        <img id="original-image" class="img-fluid" alt="Original image">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Dehazed Image</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="image-container">
+                                        <img id="processed-image" class="img-fluid" alt="Processed image">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a id="download-btn" class="btn btn-success me-2" download>
+                            <i class="fas fa-download me-2"></i>Download
+                        </a>
+                        <button id="try-another-btn" class="btn btn-secondary">
+                            <i class="fas fa-redo me-2"></i>Try Another Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Error Alert -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+        <div id="error-toast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="error-message">
+                Something went wrong. Please try again.
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="py-5 bg-dark">
+        <div class="container px-5">
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-8">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold text-white">How It Works</h2>
+                        <p class="text-muted">Our system uses deep learning to clear visual obstructions from your images</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row gx-5">
+                <div class="col-lg-4 mb-5">
+                    <div class="card h-100 border-0">
+                        <div class="card-body p-4">
+                            <div class="feature text-center mb-3">
+                                <i class="fas fa-cloud fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title text-center mb-3">Haze Removal</h5>
+                            <p class="card-text text-muted">Eliminates fog, haze, and atmospheric distortions from photos to restore clarity and visibility.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-5">
+                    <div class="card h-100 border-0">
+                        <div class="card-body p-4">
+                            <div class="feature text-center mb-3">
+                                <i class="fas fa-brain fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title text-center mb-3">Deep Learning Model</h5>
+                            <p class="card-text text-muted">Uses AOD-Net, a specialized neural network designed to restore images affected by poor visibility conditions.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-5">
+                    <div class="card h-100 border-0">
+                        <div class="card-body p-4">
+                            <div class="feature text-center mb-3">
+                                <i class="fas fa-image fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title text-center mb-3">Detail Preservation</h5>
+                            <p class="card-text text-muted">Carefully enhances images while maintaining original details and preventing artificial content generation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">© 2025 Image Dehazing System</p>
+        </div>
+    </footer>
+
+    <!-- Mobile Action Bar (visible only on small screens) -->
+    <div class="mobile-action-bar d-md-none">
+        <a href="/" class="btn btn-sm btn-dark">
+            <i class="fas fa-home"></i><br>
+            <small>Home</small>
+        </a>
+        <a href="javascript:document.getElementById('upload-btn').click();" class="btn btn-sm btn-primary">
+            <i class="fas fa-plus"></i><br>
+            <small>Upload</small>
+        </a>
+        <a href="/video" class="btn btn-sm btn-dark">
+            <i class="fas fa-video"></i><br>
+            <small>Video</small>
+        </a>
+        <a href="/compare" class="btn btn-sm btn-dark">
+            <i class="fas fa-balance-scale"></i><br>
+            <small>Compare</small>
+        </a>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- PWA Support -->
+    <script>
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/service-worker.js')
+                    .then(function(registration) {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

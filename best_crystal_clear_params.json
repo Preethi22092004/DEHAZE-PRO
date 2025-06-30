@@ -1,0 +1,18 @@
+{
+  "omega": 0.88,
+  "min_transmission": 0.12,
+  "dark_channel_kernel": 12,
+  "guided_filter_radius": 35,
+  "guided_filter_epsilon": 0.001,
+  "atmospheric_percentile": 98.0,
+  "final_blend_ratio": 0.92,
+  "brightness_boost": 1.15,
+  "contrast_boost": 1.25,
+  "saturation_boost": 0.98,
+  "gamma_correction": 0.95,
+  "white_balance": true,
+  "clarity_enhancement": true,
+  "color_balance_strength": 0.8,
+  "artifact_suppression": true,
+  "professional_mode": true
+}

@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./static/uploads:/app/static/uploads
+      - ./static/results:/app/static/results
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=sqlite:///dehazing.db
+    restart: always

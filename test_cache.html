@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cache Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        img { max-width: 400px; margin: 10px; border: 2px solid #ccc; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Cache Busting Test</h1>
+    
+    <div class="test-section">
+        <h2>Original Problem Image (should be purple if cached)</h2>
+        <img src="/static/results/33669754-942b-414a-931e-14cad5abadf3blurr1_perfect_trained_dehazed.jpg" alt="Original result">
+    </div>
+    
+    <div class="test-section">
+        <h2>Same Image with Cache Buster</h2>
+        <img id="cache-busted" src="/static/results/33669754-942b-414a-931e-14cad5abadf3blurr1_perfect_trained_dehazed.jpg" alt="Cache busted">
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Image (should be brighter)</h2>
+        <img src="/static/results/test_cache_fix.jpg" alt="Test image">
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Copy (should be same as original)</h2>
+        <img src="/static/results/test_copy.jpg" alt="Test copy">
+    </div>
+    
+    <button onclick="refreshImages()">Refresh with New Cache Busters</button>
+    
+    <script>
+        // Add cache buster to the cache-busted image
+        function addCacheBuster() {
+            const img = document.getElementById('cache-busted');
+            const timestamp = new Date().getTime();
+            const baseSrc = '/static/results/33669754-942b-414a-931e-14cad5abadf3blurr1_perfect_trained_dehazed.jpg';
+            img.src = baseSrc + '?v=' + timestamp;
+        }
+        
+        function refreshImages() {
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                const baseSrc = img.src.split('?')[0];
+                const timestamp = new Date().getTime();
+                img.src = baseSrc + '?v=' + timestamp;
+            });
+        }
+        
+        // Add cache buster on load
+        window.onload = addCacheBuster;
+    </script>
+</body>
+</html>
